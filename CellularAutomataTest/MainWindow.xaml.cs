@@ -24,18 +24,15 @@ namespace CellularAutomataTest
         DebugWriter debugger;
         CellularAutomata cellularAutomata;
         WriteableBitmap writeableBitmap;
+        int iterations = 4;
+        int size = 128;
 
         public MainWindow()
         {
             InitializeComponent();
             debugger = new DebugWriter();
-            cellularAutomata = new CellularAutomata(100, 100, 4, 3, 1);
-            writeableBitmap = BitmapFactory.New(100, 100);
+            writeableBitmap = BitmapFactory.New(size, 128);
             ImageBitmap.Source = writeableBitmap;
-            //cellularAutomata.FillRectangle(new Point(0, 0), new Point(100, 100), CellularAutomata.Cell.States.Permaalive);
-            cellularAutomata.FillRandomized(new Point(15, 15), new Point(85, 85));
-            //cellularAutomata.FillRectangle(new Point(25, 25), new Point(75, 75), CellularAutomata.Cell.States.Permadead);
-            cellularAutomata.Draw(writeableBitmap);
         }
 
         private void On_Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -45,7 +42,24 @@ namespace CellularAutomataTest
 
         private void Button_ForceIteration_Click(object sender, RoutedEventArgs e)
         {
-            cellularAutomata.Iterate();
+            DrawRoom(Convert.ToInt32(Input_DieAloneRule.Value),
+                     Convert.ToInt32(Input_DieCrowdRule.Value),
+                     Convert.ToInt32(Input_Spawn.Value));
+        }
+
+        private void DrawRoom(int dieAlone, int dieOvercrowded, int spawn)
+        {
+            cellularAutomata = new CellularAutomata((uint)size, (uint)size, (short)dieAlone, (short)dieOvercrowded, (short)spawn);
+
+            cellularAutomata.FillRectangle(new Point(0, 0), new Point(size, size), CellularAutomata.Cell.States.Permaalive);
+            cellularAutomata.FillRandomized(new Point(20, 20), new Point(size - 20, size - 20));
+            cellularAutomata.FillRectangle(new Point(30, 30), new Point(size - 30, size - 30), CellularAutomata.Cell.States.Permadead);
+
+            for (int i = 0; i < 4; i++)
+            {
+                cellularAutomata.Iterate();
+            }
+
             cellularAutomata.Draw(writeableBitmap);
         }
     }

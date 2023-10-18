@@ -5,8 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CellularAutomataTest"
         mc:Ignorable="d"
-        Title="MainWindow" Height="700" Width="700"
+        Title="MainWindow" Height="700" Width="900"
         Closing="On_Window_Closing">
+    <Window.Resources>
+        <Style x:Key="RuleSlider" TargetType="Slider">
+            <Setter Property="Minimum" Value="1"/>
+            <Setter Property="Maximum" Value="8"/>
+            <Setter Property="TickPlacement" Value="BottomRight"/>
+            <Setter Property="IsSnapToTickEnabled" Value="True"/>
+            <Setter Property="MinWidth" Value="90"/>
+        </Style>
+    </Window.Resources>
     <Grid x:Name="ApplicationGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="5"/>
@@ -17,11 +26,37 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="5"/>
             <ColumnDefinition/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="5"/>
         </Grid.ColumnDefinitions>
 
         <Image HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="ImageBitmap" Grid.Column="1" Grid.Row="1"/>
-        <Button Name="Button_ForceIteration" Click="Button_ForceIteration_Click" Margin="5" Content="Iterate!" Grid.Row="2" Grid.Column="1"></Button>
-        
+        <Button Grid.ColumnSpan="2" Name="Button_ForceIteration" Click="Button_ForceIteration_Click" Margin="5" Content="Update" Grid.Row="2" Grid.Column="1"></Button>
+
+        <StackPanel HorizontalAlignment="Center" Grid.Row="1" Grid.Column="2">
+            <TextBlock HorizontalAlignment="Center" FontSize="14">Rule editor</TextBlock>
+            <UniformGrid Columns="2">
+                <TextBlock>Die alone:</TextBlock>
+                <DockPanel>
+                    <Slider Name="Input_DieAloneRule" Style="{StaticResource RuleSlider}" Value="1"/>
+                    <TextBlock Text="{Binding ElementName=Input_DieAloneRule, Path=Value}"/>
+                </DockPanel>
+            </UniformGrid>
+            <UniformGrid Columns="2">
+                <TextBlock>Spawn:</TextBlock>
+                <DockPanel>
+                    <Slider Name="Input_Spawn" Style="{StaticResource RuleSlider}" Value="3"/>
+                    <TextBlock Text="{Binding ElementName=Input_Spawn, Path=Value}"/>
+                </DockPanel>
+            </UniformGrid>
+            <UniformGrid Columns="2">
+                <TextBlock>Die crowd:</TextBlock>
+                <DockPanel>
+                    <Slider Name="Input_DieCrowdRule" Style="{StaticResource RuleSlider}" Value="4"/>
+                    <TextBlock Text="{Binding ElementName=Input_DieCrowdRule, Path=Value}"/>
+                </DockPanel>
+            </UniformGrid>
+        </StackPanel>
+
     </Grid>
 </Window>
