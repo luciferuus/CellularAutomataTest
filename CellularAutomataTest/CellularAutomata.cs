@@ -8,10 +8,15 @@ using System.Windows.Threading;
 
 namespace CellularAutomataTest
 {
-    public class CellularAutomata
+    interface ICloneable<T>
+    {
+        T Clone();
+    }
+
+    public partial class CellularAutomata : ICloneable<CellularAutomata>
     {
         List<List<Cell>> Grid;
-        
+
         static class Properties
         {
             public static uint Width;
@@ -20,9 +25,17 @@ namespace CellularAutomataTest
 
         static class Rules
         {
-            public static short DieOvercrowded = 10;
-            public static short DieAlone = 4;
-            public static short Spawn = 5;
+            public static short[] Stay;
+            public static short[] Spawn;
+
+            public static bool Check(short input, short[] rule)
+            {
+                foreach(short num in rule)
+                {
+                    if (num == input) { return true; }
+                }
+                return false;
+            }
         }
 
         public class Cell
@@ -41,20 +54,19 @@ namespace CellularAutomataTest
                 public static readonly Color Alive = Colors.Black;
             }
 
-            public States state { get; private set; }
+            public States State { get; private set; }
 
-            public Cell() => state = States.Dead;
+            public Cell() => State = States.Dead;
 
-            public void SetState(States state) => this.state = state;
+            public void SetState(States state) => this.State = state;
         }
 
-        public CellularAutomata(uint width, uint height, short dieAlone, short dieOvercrowded, short spawn)
+        public CellularAutomata(uint width, uint height, short[] stay, short[] spawn)
         {
             Properties.Width = width + 2;
             Properties.Height = height + 2;
 
-            Rules.DieAlone = dieAlone;
-            Rules.DieOvercrowded = dieOvercrowded;
+            Rules.Stay = stay;
             Rules.Spawn = spawn;
 
             Grid = new List<List<Cell>>();
@@ -70,23 +82,25 @@ namespace CellularAutomataTest
 
         public void Iterate()
         {
-            List<List<Cell>> changes = Grid;
+            List<List<Cell>> changes = new List<List<Cell>>(Grid);
             for(int i = 1; i < Grid.Count - 1; i++)
             {
                 for(int j = 1; j < Grid[i].Count - 1; j++)
                 {
-                    switch (Grid[i][j].state)
+                    switch (Grid[i][j].State)
                     {
                         case Cell.States.Dead:
-                            if (this.AliveNeighbours(i, j) == Rules.Spawn)
+                            if (Rules.Check(this.AliveNeighbours(i, j), Rules.Spawn))
                             {
                                 changes[i][j].SetState(Cell.States.Alive);
                             }
                             break;
 
                         case Cell.States.Alive:
-                            if (this.AliveNeighbours(i, j) <= Rules.DieAlone || 
-                                this.AliveNeighbours(i, j) >= Rules.DieOvercrowded) {
+                            if (Rules.Check(this.AliveNeighbours(i, j), Rules.Stay)) {
+                                
+                            } else
+                            {
                                 changes[i][j].SetState(Cell.States.Dead);
                             }
                             break;
@@ -94,13 +108,24 @@ namespace CellularAutomataTest
                 }
             }
 
-            for (int i = 1; i < Grid.Count - 1; i++)
+            ApplyChanges(Grid, changes);
+        }
+
+        void ApplyChanges(List<List<Cell>> grid, List<List<Cell>> changes)
+        {
+            for (int i = 1; i < grid.Count - 1; i++)
             {
-                for (int j = 1; j < Grid[i].Count - 1; j++)
+                for (int j = 1; j < grid[i].Count - 1; j++)
                 {
-                    Grid[i][j].SetState(changes[i][j].state);
+                    grid[i][j].SetState(changes[i][j].State);
                 }
             }
+        }
+
+        public void Finish()
+        {
+            //Smooth();
+            //FillHoles(Grid);
         }
 
         public void Draw(WriteableBitmap writeableBitmap)
@@ -109,7 +134,7 @@ namespace CellularAutomataTest
             {
                 for(int j = 1; j < Grid[i].Count - 1; j++)
                 {
-                    switch (Grid[i][j].state)
+                    switch (Grid[i][j].State)
                     {
                         case Cell.States.Alive:
                             App.Current.Dispatcher.Invoke(() => 
@@ -192,12 +217,26 @@ namespace CellularAutomataTest
                 {
                     if(i != x && j != y)
                     {
-                        if (Grid[i][j].state == Cell.States.Alive ||
-                            Grid[i][j].state == Cell.States.Permaalive) { count++; }
+                        if (this.Grid[i][j].State == Cell.States.Alive ||
+                            this.Grid[i][j].State == Cell.States.Permaalive) { count++; }
                     }
                 }
             }
             return count;
+        }
+
+        public CellularAutomata Clone()
+        {
+            CellularAutomata clone = new CellularAutomata(Properties.Width, Properties.Height, Rules.Stay, Rules.Spawn);
+            for(int i = 1; i < this.Grid.Count - 1; i++)
+            {
+                for(int j = 1; j < this.Grid[i].Count - 1; j++)
+                {
+                    clone.Grid[i][j] = new Cell();
+                    clone.Grid[i][j].SetState(this.Grid[i][j].State);
+                }
+            }
+            return clone;
         }
     }
 }

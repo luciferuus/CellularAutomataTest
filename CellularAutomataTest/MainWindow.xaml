@@ -15,7 +15,12 @@
             <Setter Property="IsSnapToTickEnabled" Value="True"/>
             <Setter Property="MinWidth" Value="90"/>
         </Style>
+        <Style x:Key="SliderValueLabel" TargetType="TextBlock">
+            <Setter Property="MinWidth" Value="20"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
     </Window.Resources>
+    
     <Grid x:Name="ApplicationGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="5"/>
@@ -36,24 +41,19 @@
         <StackPanel HorizontalAlignment="Center" Grid.Row="1" Grid.Column="2">
             <TextBlock HorizontalAlignment="Center" FontSize="14">Rule editor</TextBlock>
             <UniformGrid Columns="2">
-                <TextBlock>Die alone:</TextBlock>
-                <DockPanel>
-                    <Slider Name="Input_DieAloneRule" Style="{StaticResource RuleSlider}" Value="1"/>
-                    <TextBlock Text="{Binding ElementName=Input_DieAloneRule, Path=Value}"/>
-                </DockPanel>
+                <TextBlock>Stay:</TextBlock>
+                <TextBox Name="StayInput" Text=""></TextBox>
             </UniformGrid>
             <UniformGrid Columns="2">
                 <TextBlock>Spawn:</TextBlock>
-                <DockPanel>
-                    <Slider Name="Input_Spawn" Style="{StaticResource RuleSlider}" Value="3"/>
-                    <TextBlock Text="{Binding ElementName=Input_Spawn, Path=Value}"/>
-                </DockPanel>
+                <TextBox Name="SpawnInput"></TextBox>
             </UniformGrid>
             <UniformGrid Columns="2">
-                <TextBlock>Die crowd:</TextBlock>
+                <TextBlock>Iterations</TextBlock>
                 <DockPanel>
-                    <Slider Name="Input_DieCrowdRule" Style="{StaticResource RuleSlider}" Value="4"/>
-                    <TextBlock Text="{Binding ElementName=Input_DieCrowdRule, Path=Value}"/>
+                    <Slider Name="Input_Iterations" Style="{StaticResource RuleSlider}" Maximum="100" Value="4"/>
+                    <TextBlock Text="{Binding ElementName=Input_Iterations, Path=Value}" 
+                               Style="{StaticResource SliderValueLabel}"/>
                 </DockPanel>
             </UniformGrid>
         </StackPanel>

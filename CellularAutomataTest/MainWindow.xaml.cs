@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
@@ -21,11 +24,11 @@ namespace CellularAutomataTest
     /// </summary>
     public partial class MainWindow : Window
     {
-        DebugWriter debugger;
+        readonly DebugWriter debugger;
         CellularAutomata cellularAutomata;
-        WriteableBitmap writeableBitmap;
+        readonly WriteableBitmap writeableBitmap;
         int iterations = 4;
-        int size = 128;
+        readonly int size = 128;
 
         public MainWindow()
         {
@@ -42,25 +45,60 @@ namespace CellularAutomataTest
 
         private void Button_ForceIteration_Click(object sender, RoutedEventArgs e)
         {
-            DrawRoom(Convert.ToInt32(Input_DieAloneRule.Value),
-                     Convert.ToInt32(Input_DieCrowdRule.Value),
-                     Convert.ToInt32(Input_Spawn.Value));
+            iterations = Convert.ToInt32(Input_Iterations.Value);
+            DrawRoom(GetRuleArray(StayInput), GetRuleArray(SpawnInput));
+            
         }
 
-        private void DrawRoom(int dieAlone, int dieOvercrowded, int spawn)
+        private void DrawRoom(short[] stay, short[] spawn)
         {
-            cellularAutomata = new CellularAutomata((uint)size, (uint)size, (short)dieAlone, (short)dieOvercrowded, (short)spawn);
+            debugger.Write(StayInput.Text);
+            debugger.Write(ArrayToString(stay));
+            debugger.Write(SpawnInput.Text);
+            debugger.Write(ArrayToString(spawn));
+            cellularAutomata = new CellularAutomata((uint)size, (uint)size, stay, spawn);
 
             cellularAutomata.FillRectangle(new Point(0, 0), new Point(size, size), CellularAutomata.Cell.States.Permaalive);
             cellularAutomata.FillRandomized(new Point(20, 20), new Point(size - 20, size - 20));
             cellularAutomata.FillRectangle(new Point(30, 30), new Point(size - 30, size - 30), CellularAutomata.Cell.States.Permadead);
 
-            for (int i = 0; i < 4; i++)
+            /*for (int i = 0; i < iterations; i++)
             {
                 cellularAutomata.Iterate();
-            }
+            }*/
+
+            //cellularAutomata.Finish();
 
             cellularAutomata.Draw(writeableBitmap);
+        }
+
+        short[] GetRuleArray(TextBox textBox)
+        {
+            string temp = textBox.Text;
+            temp = temp.Trim();
+            string[] tarr = temp.Split(' ');
+            short[] resarr = new short[tarr.Length];
+            for(int i = 0; i < resarr.Length; i++)
+            {
+                try
+                {
+                    resarr[i] = Convert.ToInt16(tarr[i]);
+                }
+                catch { debugger.Write("Error during appending. Skipping"); }
+            }
+            return resarr;
+        }
+
+        string ArrayToString(short[] shorts) {
+            string temp = string.Empty;
+            temp += "[";
+            foreach (short item in shorts)
+            {
+                temp += item.ToString();
+                if(item != shorts[shorts.Length - 1]) {  temp += ", "; }
+            }
+            temp += "]";
+            return temp;
         }
     }
 }
